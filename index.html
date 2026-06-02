@@ -1,330 +1,47 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CNC Toolbox</title>
-
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Consolas,Arial,sans-serif;
-  background:#050505;
-  color:#eee;
-}
-.app{
-  min-height:100vh;
-  background:
-    radial-gradient(circle at top right,rgba(180,0,0,.25),transparent 35%),
-    linear-gradient(#090909,#020202);
-  padding:14px;
-}
-.panel{
-  max-width:1150px;
-  margin:auto;
-  border:2px solid #7a0c0c;
-  background:#101010;
-  box-shadow:0 0 45px rgba(180,0,0,.22);
-}
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 16px;
-  background:#1a1a1a;
-  border-bottom:2px solid #7a0c0c;
-}
-.title{
-  font-size:28px;
-  color:#ff2a2a;
-  font-weight:bold;
-}
-.subtitle{color:#aaa;font-size:13px}
-.disk{
-  width:58px;
-  height:58px;
-  border:8px solid #333;
-  border-top-color:#ff2a2a;
-  border-right-color:#7a0c0c;
-  border-radius:50%;
-  animation:spin 3s linear infinite;
-}
-.main{
-  display:grid;
-  grid-template-columns:1fr 280px;
-  gap:12px;
-  padding:12px;
-}
-.searchbox{
-  background:#171717;
-  border:1px solid #333;
-  padding:14px;
-}
-input{
-  width:100%;
-  background:#050505;
-  color:#fff;
-  border:2px solid #7a0c0c;
-  padding:18px;
-  font-size:30px;
-  outline:none;
-  text-transform:uppercase;
-}
-input:focus{border-color:#ff2a2a}
-.examples{
-  margin-top:8px;
-  color:#888;
-  font-size:13px;
-}
-.result{
-  margin-top:12px;
-  border:1px solid #333;
-  background:#0b0b0b;
-  display:none;
-}
-.row{
-  display:grid;
-  grid-template-columns:220px 1fr;
-  border-bottom:1px solid #262626;
-}
-.row:last-child{border-bottom:0}
-.label{
-  padding:12px;
-  background:#171717;
-  color:#ff4d4d;
-  border-right:1px solid #333;
-}
-.value{
-  padding:12px;
-  font-size:22px;
-  color:#fff;
-}
-.badge{
-  display:inline-block;
-  background:#7a0c0c;
-  color:#fff;
-  padding:6px 10px;
-  margin-bottom:8px;
-  font-size:13px;
-}
-.side{
-  display:grid;
-  gap:10px;
-}
-.btn{
-  background:#171717;
-  border:1px solid #7a0c0c;
-  color:#fff;
-  padding:14px;
-  cursor:pointer;
-  text-align:left;
-  font-weight:bold;
-}
-.btn.active,.btn:hover{background:#7a0c0c}
-.calc{
-  display:none;
-  background:#171717;
-  border:1px solid #333;
-  padding:14px;
-}
-.calc.active{display:block}
-.calc input{
-  font-size:20px;
-  margin-bottom:10px;
-}
-.note{
-  color:#888;
-  font-size:13px;
-  margin-top:10px;
-}
-.error{
-  padding:16px;
-  color:#ffb4b4;
-  background:#250707;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:850px){
-  .main{grid-template-columns:1fr}
-  .row{grid-template-columns:1fr}
-  .label{border-right:0}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CNC Toolbox</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-<div class="app">
-  <div class="panel">
-    <div class="topbar">
-      <div>
-        <div class="title">CNC TOOLBOX</div>
-        <div class="subtitle">Draad • Passingen • Toerental • Voeding</div>
-      </div>
-      <div class="disk"></div>
-    </div>
-
-    <div class="main">
-      <div>
-        <div class="searchbox">
-          <input id="zoekveld" placeholder="Typ M10, MF10, 25H7, G1/4" oninput="zoeken()">
-          <div class="examples">Voorbeelden: M10, M10x1.25, MF10, MF10x1, G1/4, R1/4, NPT1/4, 25H7, 25h6, 40g6</div>
+  <main class="app">
+    <section class="panel">
+      <header class="topbar">
+        <div>
+          <h1>CNC TOOLBOX</h1>
+          <p>Draad • Passingen • Radiuscompensatie • Toeren • Voeding</p>
         </div>
-        <div id="resultaat" class="result"></div>
-
-        <div id="rpmCalc" class="calc">
-          <input id="vc" type="number" placeholder="Vc m/min" oninput="berekenRPM()">
-          <input id="diameter" type="number" placeholder="Diameter mm" oninput="berekenRPM()">
-          <div id="rpmResult"></div>
+        <div class="cutter" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
         </div>
+      </header>
 
-        <div id="feedCalc" class="calc">
-          <input id="rpmInput" type="number" placeholder="RPM" oninput="berekenFeed()">
-          <input id="zInput" type="number" placeholder="Aantal tanden Z" oninput="berekenFeed()">
-          <input id="fzInput" type="number" step="0.01" placeholder="fz mm/tand" oninput="berekenFeed()">
-          <div id="feedResult"></div>
+      <section class="search-panel">
+        <label for="searchInput">Werkplaats zoekbalk</label>
+        <input id="searchInput" type="text" autocomplete="off" placeholder="Typ M20 STAAL, M10, MF10, 25H7, G1/4, VC200 D80" />
+        <div class="quick-examples">
+          <button data-example="M20 STAAL">M20 STAAL</button>
+          <button data-example="M10">M10</button>
+          <button data-example="MF10">MF10</button>
+          <button data-example="25H7">25H7</button>
+          <button data-example="G1/4">G1/4</button>
+          <button data-example="VC200 D80">VC200 D80</button>
+          <button data-example="RPM800 Z8 FZ0.15">RPM800 Z8 FZ0.15</button>
         </div>
-      </div>
+      </section>
 
-      <div class="side">
-        <button class="btn active" onclick="mode('zoek',this)">ZOEKEN</button>
-        <button class="btn" onclick="mode('rpm',this)">TOERENTAL</button>
-        <button class="btn" onclick="mode('feed',this)">VOEDING</button>
-      </div>
-    </div>
-  </div>
-</div>
+      <section id="result" class="result empty">
+        <div class="empty-state">
+          <strong>Typ een maat of berekening.</strong>
+          <span>Bijvoorbeeld M20 STAAL voor draadgegevens + radiuscompensatie.</span>
+        </div>
+      </section>
+    </section>
+  </main>
 
-<script>
-const draadTabel={
-"M3":["Metrische draad",3,0.5,2.5],
-"M4":["Metrische draad",4,0.7,3.3],
-"M5":["Metrische draad",5,0.8,4.2],
-"M6":["Metrische draad",6,1.0,5.0],
-"M8":["Metrische draad",8,1.25,6.8],
-"M10":["Metrische draad",10,1.5,8.5],
-"M12":["Metrische draad",12,1.75,10.2],
-"M16":["Metrische draad",16,2.0,14.0],
-"M20":["Metrische draad",20,2.5,17.5],
-"M24":["Metrische draad",24,3.0,21.0],
-"M30":["Metrische draad",30,3.5,26.5],
-
-"M10X1":["Metrische fijne draad",10,1.0,9.0],
-"M10X1.25":["Metrische fijne draad",10,1.25,8.8],
-"M12X1.5":["Metrische fijne draad",12,1.5,10.5],
-"M16X1.5":["Metrische fijne draad",16,1.5,14.5],
-"M20X1.5":["Metrische fijne draad",20,1.5,18.5],
-
-"MF10":["Metrische fijne draad",10,1.0,9.0],
-"MF10X0.75":["Metrische fijne draad",10,0.75,9.25],
-"MF10X1":["Metrische fijne draad",10,1.0,9.0],
-"MF10X1.25":["Metrische fijne draad",10,1.25,8.8],
-"MF12":["Metrische fijne draad",12,1.5,10.5],
-"MF16":["Metrische fijne draad",16,1.5,14.5],
-"MF20":["Metrische fijne draad",20,1.5,18.5],
-
-"G1/8":["BSP G draad",9.728,0.907,8.8],
-"G1/4":["BSP G draad",13.157,1.337,11.8],
-"G3/8":["BSP G draad",16.662,1.337,15.25],
-"G1/2":["BSP G draad",20.955,1.814,19.0],
-
-"R1/8":["BSP R conisch",9.728,0.907,8.8],
-"R1/4":["BSP R conisch",13.157,1.337,11.8],
-"R3/8":["BSP R conisch",16.662,1.337,15.25],
-"R1/2":["BSP R conisch",20.955,1.814,19.0],
-
-"NPT1/8":["NPT draad",10.242,0.941,8.6],
-"NPT1/4":["NPT draad",13.616,1.411,11.1],
-"NPT3/8":["NPT draad",17.055,1.411,14.6],
-"NPT1/2":["NPT draad",21.223,1.814,17.9]
-};
-
-function mode(m,btn){
- document.querySelectorAll(".btn").forEach(b=>b.classList.remove("active"));
- btn.classList.add("active");
- document.getElementById("resultaat").style.display=m==="zoek"?"block":"none";
- document.getElementById("rpmCalc").classList.toggle("active",m==="rpm");
- document.getElementById("feedCalc").classList.toggle("active",m==="feed");
-}
-
-function zoeken(){
- const raw=document.getElementById("zoekveld").value.trim();
- const key=raw.toUpperCase().replace(/\s/g,"");
- const res=document.getElementById("resultaat");
- if(!key){res.style.display="none";return;}
- res.style.display="block";
-
- if(draadTabel[key]){
-  const d=draadTabel[key];
-  res.innerHTML=`
-  <div style="padding:12px"><span class="badge">${d[0]}</span></div>
-  ${rij("Draad",key)}
-  ${rij("Diameter",d[1]+" mm")}
-  ${rij("Spoed",d[2]+" mm")}
-  ${rij("Tapboor",d[3]+" mm")}
-  <div class="note" style="padding:12px">Controleer kritische draad altijd met officiële tabel.</div>`;
-  return;
- }
-
- const m=raw.replace(/\s/g,"").match(/^(\d+(\.\d+)?)([A-Za-z]+)(\d+)$/);
- if(m){
-  const dia=parseFloat(m[1]);
-  const letter=m[3];
-  const klasse=parseInt(m[4]);
-  const isGat=letter===letter.toUpperCase();
-  const it=berekenIT(dia,klasse);
-  let boven=0,onder=0;
-
-  if(isGat&&letter.toUpperCase()==="H"){onder=0;boven=it;}
-  else if(!isGat&&letter==="h"){boven=0;onder=-it;}
-  else if(!isGat&&letter==="g"){boven=-Math.round(2.5*Math.pow(dia,.34));onder=boven-it;}
-  else if(!isGat&&letter==="f"){boven=-Math.round(5.5*Math.pow(dia,.41));onder=boven-it;}
-  else{res.innerHTML=`<div class="error">Ondersteund: H, h, g en f.</div>`;return;}
-
-  const min=(dia+onder/1000).toFixed(3);
-  const max=(dia+boven/1000).toFixed(3);
-
-  res.innerHTML=`
-  <div style="padding:12px"><span class="badge">${isGat?"Gatpassing":"Aspassing"}</span></div>
-  ${rij("Passing",dia+letter+klasse)}
-  ${rij("Onder",onder+" µm")}
-  ${rij("Boven",boven+" µm")}
-  ${rij("Min maat",min+" mm")}
-  ${rij("Max maat",max+" mm")}
-  <div class="note" style="padding:12px">Benadering. Voor eindcontrole officiële passingtabel gebruiken.</div>`;
-  return;
- }
-
- res.innerHTML=`<div class="error">Geen resultaat voor ${raw}</div>`;
-}
-
-function rij(a,b){
- return `<div class="row"><div class="label">${a}</div><div class="value">${b}</div></div>`;
-}
-
-function berekenIT(d,k){
- const i=.45*Math.cbrt(d)+.001*d;
- const f={5:7,6:10,7:16,8:25,9:40,10:64,11:100,12:160};
- return f[k]?Math.round(i*f[k]):null;
-}
-
-function berekenRPM(){
- const vc=parseFloat(document.getElementById("vc").value);
- const d=parseFloat(document.getElementById("diameter").value);
- const out=document.getElementById("rpmResult");
- if(!vc||!d){out.innerHTML="";return;}
- const rpm=Math.round((vc*1000)/(Math.PI*d));
- out.innerHTML=rij("Toerental",rpm+" rpm");
-}
-
-function berekenFeed(){
- const rpm=parseFloat(document.getElementById("rpmInput").value);
- const z=parseFloat(document.getElementById("zInput").value);
- const fz=parseFloat(document.getElementById("fzInput").value);
- const out=document.getElementById("feedResult");
- if(!rpm||!z||!fz){out.innerHTML="";return;}
- const feed=Math.round(rpm*z*fz);
- out.innerHTML=rij("Voeding",feed+" mm/min");
-}
-</script>
+  <script src="script.js"></script>
 </body>
 </html>
