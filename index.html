@@ -21,16 +21,19 @@
 
       <section class="search-panel">
         <label for="searchInput">Werkplaats zoekbalk</label>
-        <input id="searchInput" type="text" autocomplete="off" placeholder="Typ M20 STAAL, M10, MF10, 25H7, G1/4, VC200 D80" />
-        <div class="quick-examples">
-
+        <input id="searchInput" type="text" autocomplete="off" placeholder="M20 STAAL  |  25H7  |  VC200 D80  |  RPM800 Z8 FZ0.15" />
+        <div class="syntax-line">
+          <span>Draad: M10 / M20 STAAL</span>
+          <span>Passing: 25H7</span>
+          <span>Toeren: VC200 D80</span>
+          <span>Voeding: RPM800 Z8 FZ0.15</span>
         </div>
       </section>
 
       <section id="result" class="result empty">
         <div class="empty-state">
-          <strong>Typ een maat of berekening.</strong>
-          <span>Bijvoorbeeld M20 STAAL voor draadgegevens + radiuscompensatie.</span>
+          <strong>Typ in één zoekbalk wat je nodig hebt.</strong>
+          <span>M20 STAAL = draad + radiuscompensatie. VC200 D80 = toerental. RPM800 Z8 FZ0.15 = voeding.</span>
         </div>
       </section>
     </section>

@@ -101,11 +101,14 @@ function search(raw) {
   const compact = text.replace(/\s/g,"");
   if (!text) return renderEmpty();
 
-  const rpmCalc = parseRpm(text);
-  if (rpmCalc) return renderRpm(rpmCalc);
-
   const feedCalc = parseFeed(text);
   if (feedCalc) return renderFeed(feedCalc);
+
+  const drillCalc = parseDrill(text);
+  if (drillCalc) return renderDrill(drillCalc);
+
+  const rpmCalc = parseRpm(text);
+  if (rpmCalc) return renderRpm(rpmCalc);
 
   const fit = parseFit(compact);
   if (fit) return renderFit(fit);
@@ -114,7 +117,7 @@ function search(raw) {
   const threadKey = findThreadKey(text);
   if (threadKey || radiusKey) return renderThreadAndRadius(threadKey, radiusKey);
 
-  renderError(`Geen resultaat voor "${escapeHtml(raw)}". Probeer M20 STAAL, M10, 25H7, G1/4, VC200 D80 of RPM800 Z8 FZ0.15.`);
+  renderError(`Geen resultaat voor "${escapeHtml(raw)}". Gebruik bijvoorbeeld M20 STAAL, M10, 25H7, G1/4, VC200 D80 of RPM800 Z8 FZ0.15.`);
 }
 
 function findThreadKey(text) {
@@ -225,9 +228,37 @@ function renderFit(f) {
   `);
 }
 
+function parseDrill(text) {
+  const vc = text.match(/VC\s*(\d+(\.\d+)?)/);
+  const d = text.match(/(?:^|\s)D\s*(\d+(\.\d+)?)/);
+  const f = text.match(/(?:^|\s)F\s*(\d+(\.\d+)?)/);
+  if (!vc || !d || !f || text.includes("FZ")) return null;
+  const vcVal = Number(vc[1]);
+  const dVal = Number(d[1]);
+  const fVal = Number(f[1]);
+  if (!vcVal || !dVal || !fVal) return null;
+  const rpm = Math.round((vcVal * 1000) / (Math.PI * dVal));
+  const feed = Math.round(rpm * fVal);
+  return {vc:vcVal, d:dVal, f:fVal, rpm, feed};
+}
+
+function renderDrill(x) {
+  result.className = "result";
+  result.innerHTML = block("Boor calculator", `D${x.d} VC${x.vc} F${x.f}`, `
+    <div class="grid">
+      ${row("Diameter", x.d + " mm")}
+      ${row("Vc", x.vc + " m/min")}
+      ${row("Voeding per omw.", x.f + " mm/omw")}
+      ${row("Toerental", x.rpm + " rpm")}
+      ${row("Voeding", x.feed + " mm/min")}
+    </div>
+    <div class="note">Formules: rpm = Vc × 1000 / (π × D), voeding = rpm × f</div>
+  `);
+}
+
 function parseRpm(text) {
   const vc = text.match(/VC\s*(\d+(\.\d+)?)/);
-  const d = text.match(/D\s*(\d+(\.\d+)?)/);
+  const d = text.match(/(?:^|\s)D\s*(\d+(\.\d+)?)/);
   if (!vc || !d) return null;
   const vcVal = Number(vc[1]);
   const dVal = Number(d[1]);
@@ -248,9 +279,9 @@ function renderRpm(x) {
 }
 
 function parseFeed(text) {
-  const rpm = text.match(/RPM\s*(\d+(\.\d+)?)/);
+  const rpm = text.match(/(?:RPM|S|N)\s*(\d+(\.\d+)?)/);
   const z = text.match(/Z\s*(\d+(\.\d+)?)/);
-  const fz = text.match(/FZ\s*(\d+(\.\d+)?)/);
+  const fz = text.match(/(?:FZ|F)\s*(\d+(\.\d+)?)/);
   if (!rpm || !z || !fz) return null;
   const rpmVal = Number(rpm[1]);
   const zVal = Number(z[1]);
