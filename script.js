@@ -96,6 +96,14 @@ document.querySelectorAll("[data-example]").forEach(btn => {
   });
 });
 
+result.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-radius-search]");
+  if (!btn) return;
+  input.value = btn.dataset.radiusSearch;
+  search(input.value);
+  input.focus();
+});
+
 function search(raw) {
   const text = raw.trim().toUpperCase().replace(/,/g,".").replace(/\s+/g," ");
   const compact = text.replace(/\s/g,"");
@@ -171,9 +179,10 @@ function radiusBlock(key, d) {
 
 function availableBlock(size, materials) {
   return block("Radiuscompensatie beschikbaar", size, `
-    <div class="grid">
-      ${materials.map(m => row(m, `Typ ${size} ${m}`)).join("")}
+    <div class="material-buttons">
+      ${materials.map(m => `<button class="mat-btn" data-radius-search="${size} ${m}">${m}</button>`).join("")}
     </div>
+    <div class="note">Klik op materiaal om de radiuscompensatie direct te tonen.</div>
   `);
 }
 
