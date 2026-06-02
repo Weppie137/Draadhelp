@@ -12,58 +12,30 @@
       <header class="topbar">
         <div>
           <h1>CNC TOOLBOX</h1>
-          <p>Draad • Passingen • Radiuscompensatie • Toerental • Voeding</p>
+          <p>Draad • Passingen • Radiuscompensatie • Toeren • Voeding</p>
         </div>
         <div class="cutter" aria-hidden="true">
           <span></span><span></span><span></span><span></span>
         </div>
       </header>
 
-      <nav class="modebar" aria-label="Tool keuze">
-        <button class="mode-btn active" data-mode="search">DRAAD / PASSING / RADIUS</button>
-        <button class="mode-btn" data-mode="rpm">TOERENTAL</button>
-        <button class="mode-btn" data-mode="feed">VOEDING</button>
-      </nav>
-
-      <section id="searchPanel" class="search-panel tool-panel active">
+      <section class="search-panel">
         <label for="searchInput">Werkplaats zoekbalk</label>
-        <input id="searchInput" type="text" autocomplete="off" placeholder="Typ M20, M20 STAAL, MF10, 25H7 of G1/4" />
+        <input id="searchInput" type="text" autocomplete="off" placeholder="Typ M20 STAAL, M10, MF10, 25H7, G1/4, VC200 D80" />
         <div class="quick-examples">
-          <button data-example="M20">M20</button>
           <button data-example="M20 STAAL">M20 STAAL</button>
           <button data-example="M10">M10</button>
           <button data-example="MF10">MF10</button>
           <button data-example="25H7">25H7</button>
           <button data-example="G1/4">G1/4</button>
-        </div>
-      </section>
-
-      <section id="rpmPanel" class="calc-panel tool-panel">
-        <div class="calc-head">
-          <strong>TOERENTAL BEREKENEN</strong>
-          <span>Vul zelf Vc en diameter in</span>
-        </div>
-        <div class="calc-grid">
-          <label>Vc m/min<input id="rpmVc" type="number" inputmode="decimal" placeholder="bijv. 200" /></label>
-          <label>Diameter mm<input id="rpmDia" type="number" inputmode="decimal" placeholder="bijv. 80" /></label>
-        </div>
-      </section>
-
-      <section id="feedPanel" class="calc-panel tool-panel">
-        <div class="calc-head">
-          <strong>VOEDING BEREKENEN</strong>
-          <span>Vul zelf rpm, Z en fz in</span>
-        </div>
-        <div class="calc-grid">
-          <label>RPM<input id="feedRpm" type="number" inputmode="decimal" placeholder="bijv. 795" /></label>
-          <label>Aantal tanden Z<input id="feedZ" type="number" inputmode="decimal" placeholder="bijv. 8" /></label>
-          <label>fz mm/tand<input id="feedFz" type="number" inputmode="decimal" step="0.01" placeholder="bijv. 0.15" /></label>
+          <button data-example="VC200 D80">VC200 D80</button>
+          <button data-example="RPM800 Z8 FZ0.15">RPM800 Z8 FZ0.15</button>
         </div>
       </section>
 
       <section id="result" class="result empty">
         <div class="empty-state">
-          <strong>Typ een maat.</strong>
+          <strong>Typ een maat of berekening.</strong>
           <span>Bijvoorbeeld M20 STAAL voor draadgegevens + radiuscompensatie.</span>
         </div>
       </section>

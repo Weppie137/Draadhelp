@@ -86,40 +86,8 @@ const radiusData = {
 
 const result = document.getElementById("result");
 const input = document.getElementById("searchInput");
-const modeButtons = document.querySelectorAll(".mode-btn");
-const panels = {
-  search: document.getElementById("searchPanel"),
-  rpm: document.getElementById("rpmPanel"),
-  feed: document.getElementById("feedPanel")
-};
 
 input.addEventListener("input", () => search(input.value));
-modeButtons.forEach(btn => {
-  btn.addEventListener("click", () => setMode(btn.dataset.mode));
-});
-
-document.getElementById("rpmVc").addEventListener("input", calculateRpmTab);
-document.getElementById("rpmDia").addEventListener("input", calculateRpmTab);
-document.getElementById("feedRpm").addEventListener("input", calculateFeedTab);
-document.getElementById("feedZ").addEventListener("input", calculateFeedTab);
-document.getElementById("feedFz").addEventListener("input", calculateFeedTab);
-
-function setMode(mode) {
-  modeButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.mode === mode));
-  Object.entries(panels).forEach(([key, panel]) => panel.classList.toggle("active", key === mode));
-
-  if (mode === "search") {
-    search(input.value);
-    input.focus();
-  } else if (mode === "rpm") {
-    calculateRpmTab();
-    document.getElementById("rpmVc").focus();
-  } else if (mode === "feed") {
-    calculateFeedTab();
-    document.getElementById("feedRpm").focus();
-  }
-}
-
 document.querySelectorAll("[data-example]").forEach(btn => {
   btn.addEventListener("click", () => {
     input.value = btn.dataset.example;
@@ -128,20 +96,16 @@ document.querySelectorAll("[data-example]").forEach(btn => {
   });
 });
 
-result.addEventListener("click", (event) => {
-  const btn = event.target.closest("[data-radius-search]");
-  if (!btn) return;
-  input.value = btn.dataset.radiusSearch;
-  search(input.value);
-  input.focus();
-});
-
 function search(raw) {
   const text = raw.trim().toUpperCase().replace(/,/g,".").replace(/\s+/g," ");
   const compact = text.replace(/\s/g,"");
   if (!text) return renderEmpty();
 
-  // Toerental en voeding staan bewust in aparte tabbladen.
+  const rpmCalc = parseRpm(text);
+  if (rpmCalc) return renderRpm(rpmCalc);
+
+  const feedCalc = parseFeed(text);
+  if (feedCalc) return renderFeed(feedCalc);
 
   const fit = parseFit(compact);
   if (fit) return renderFit(fit);
@@ -150,7 +114,7 @@ function search(raw) {
   const threadKey = findThreadKey(text);
   if (threadKey || radiusKey) return renderThreadAndRadius(threadKey, radiusKey);
 
-  renderError(`Geen resultaat voor "${escapeHtml(raw)}". Probeer M20 STAAL, M10, 25H7 of G1/4. Toerental en voeding staan in aparte tabbladen.`);
+  renderError(`Geen resultaat voor "${escapeHtml(raw)}". Probeer M20 STAAL, M10, 25H7, G1/4, VC200 D80 of RPM800 Z8 FZ0.15.`);
 }
 
 function findThreadKey(text) {
@@ -173,12 +137,18 @@ function findRadiusKey(text) {
 
 function renderThreadAndRadius(threadKey, radiusKey) {
   let html = "";
+  const size = radiusKey ? radiusKey.split(" ")[0] : threadKey;
+  const activeMaterial = radiusKey ? radiusKey.split(" ")[1] : null;
+
   if (threadKey) html += threadBlock(threadKey, threadData[threadKey]);
-  if (radiusKey) html += radiusBlock(radiusKey, radiusData[radiusKey]);
-  if (!radiusKey && threadKey && /^M\d+$/.test(threadKey)) {
-    const available = ["STAAL","ALU","RVS"].filter(m => radiusData[`${threadKey} ${m}`]);
-    if (available.length) html += availableBlock(threadKey, available);
+
+  if (size && /^M\d+$/.test(size)) {
+    const available = ["STAAL","ALU","RVS"].filter(m => radiusData[`${size} ${m}`]);
+    if (available.length) html += materialSwitchBlock(size, available, activeMaterial);
   }
+
+  if (radiusKey) html += radiusBlock(radiusKey, radiusData[radiusKey]);
+
   result.className = "result";
   result.innerHTML = html;
 }
@@ -205,13 +175,19 @@ function radiusBlock(key, d) {
   `);
 }
 
-function availableBlock(size, materials) {
-  return block("Radiuscompensatie beschikbaar", size, `
-    <div class="material-buttons">
-      ${materials.map(m => `<button class="mat-btn" data-radius-search="${size} ${m}">${m}</button>`).join("")}
+function materialSwitchBlock(size, materials, activeMaterial) {
+  return block("Materiaalkeuze radiuscompensatie", size, `
+    <div class="material-switch">
+      ${materials.map(m => `<button class="material-btn ${m === activeMaterial ? "active" : ""}" onclick="selectMaterial('${size}','${m}')">${m}</button>`).join("")}
     </div>
-    <div class="note">Klik op materiaal om de radiuscompensatie direct te tonen.</div>
+    <div class="note">Klik op een materiaal om te wisselen zonder opnieuw te typen.</div>
   `);
+}
+
+function selectMaterial(size, material) {
+  input.value = `${size} ${material}`;
+  search(input.value);
+  input.focus();
 }
 
 function parseFit(compact) {
@@ -248,29 +224,6 @@ function renderFit(f) {
     <div class="note">Ondersteund: H, h, g en f. Benadering volgens ISO-formule. Voor eindcontrole officiële passingtabel gebruiken.</div>
   `);
 }
-
-function calculateRpmTab() {
-  const vc = Number(document.getElementById("rpmVc").value.replace?.(",", ".") || document.getElementById("rpmVc").value);
-  const d = Number(document.getElementById("rpmDia").value.replace?.(",", ".") || document.getElementById("rpmDia").value);
-  if (!vc && !d) return renderCalcEmpty("Toerental", "Vul Vc en diameter in. Velden blijven leeg totdat jij iets invult.");
-  if (!vc || !d) return renderCalcEmpty("Toerental", "Vul zowel Vc als diameter in.");
-  renderRpm({vc, d, rpm: Math.round((vc * 1000) / (Math.PI * d))});
-}
-
-function calculateFeedTab() {
-  const rpm = Number(document.getElementById("feedRpm").value.replace?.(",", ".") || document.getElementById("feedRpm").value);
-  const z = Number(document.getElementById("feedZ").value.replace?.(",", ".") || document.getElementById("feedZ").value);
-  const fz = Number(document.getElementById("feedFz").value.replace?.(",", ".") || document.getElementById("feedFz").value);
-  if (!rpm && !z && !fz) return renderCalcEmpty("Voeding", "Vul rpm, aantal tanden Z en fz in. Velden blijven leeg totdat jij iets invult.");
-  if (!rpm || !z || !fz) return renderCalcEmpty("Voeding", "Vul rpm, Z en fz allemaal in.");
-  renderFeed({rpm, z, fz, feed: Math.round(rpm * z * fz)});
-}
-
-function renderCalcEmpty(title, message) {
-  result.className = "result empty";
-  result.innerHTML = `<div class="empty-state"><strong>${title}</strong><span>${message}</span></div>`;
-}
-
 
 function parseRpm(text) {
   const vc = text.match(/VC\s*(\d+(\.\d+)?)/);
@@ -340,7 +293,7 @@ function escapeHtml(s) {
 }
 function renderEmpty() {
   result.className = "result empty";
-  result.innerHTML = `<div class="empty-state"><strong>Typ een maat.</strong><span>Bijvoorbeeld M20 STAAL voor draadgegevens + radiuscompensatie. Toerental en voeding staan in aparte tabbladen.</span></div>`;
+  result.innerHTML = `<div class="empty-state"><strong>Typ een maat of berekening.</strong><span>Bijvoorbeeld M20 STAAL voor draadgegevens + radiuscompensatie.</span></div>`;
 }
 function renderError(msg) {
   result.className = "result";
