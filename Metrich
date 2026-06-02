@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Draad tabel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    input, button {
+      font-size: 18px;
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    .resultaat {
+      margin-top: 25px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #f7f7f7;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Draadgegevens zoeken</h1>
+
+  <p>Vul draadtype in, bijvoorbeeld: <b>M6</b>, <b>M8</b>, <b>M10</b></p>
+
+  <input type="text" id="draadInput" placeholder="Bijvoorbeeld M10">
+  <button onclick="zoekDraad()">Zoeken</button>
+
+  <div id="resultaat" class="resultaat" style="display:none;"></div>
+
+  <script>
+    const draadTabel = {
+      "M3":  { spoed: "0.5 mm", boor: "2.5 mm" },
+      "M4":  { spoed: "0.7 mm", boor: "3.3 mm" },
+      "M5":  { spoed: "0.8 mm", boor: "4.2 mm" },
+      "M6":  { spoed: "1.0 mm", boor: "5.0 mm" },
+      "M8":  { spoed: "1.25 mm", boor: "6.8 mm" },
+      "M10": { spoed: "1.5 mm", boor: "8.5 mm" },
+      "M12": { spoed: "1.75 mm", boor: "10.2 mm" },
+      "M14": { spoed: "2.0 mm", boor: "12.0 mm" },
+      "M16": { spoed: "2.0 mm", boor: "14.0 mm" },
+      "M18": { spoed: "2.5 mm", boor: "15.5 mm" },
+      "M20": { spoed: "2.5 mm", boor: "17.5 mm" },
+      "M24": { spoed: "3.0 mm", boor: "21.0 mm" },
+      "M30": { spoed: "3.5 mm", boor: "26.5 mm" }
+    };
+
+    function zoekDraad() {
+      const invoer = document.getElementById("draadInput").value.toUpperCase().replace(/\s/g, "");
+      const resultaat = document.getElementById("resultaat");
+
+      if (draadTabel[invoer]) {
+        resultaat.style.display = "block";
+        resultaat.innerHTML = `
+          <h2>${invoer}</h2>
+          <p><b>Spoed:</b> ${draadTabel[invoer].spoed}</p>
+          <p><b>Tapboor diameter:</b> ${draadTabel[invoer].boor}</p>
+        `;
+      } else {
+        resultaat.style.display = "block";
+        resultaat.innerHTML = `
+          <p>Geen gegevens gevonden voor <b>${invoer}</b>.</p>
+          <p>Controleer de invoer, bijvoorbeeld M6, M8 of M10.</p>
+        `;
+      }
+    }
+  </script>
+
+</body>
+</html>
+
