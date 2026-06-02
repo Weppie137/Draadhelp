@@ -217,3 +217,80 @@ h1{
   .grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}.key{border-right:0}.val{font-size:18px}
   .status-row{grid-template-columns:1fr}.status-value{text-align:left}.status-name{border-right:0}
 }
+
+/* V4: aparte tabbladen voor zoeken, toerental en voeding */
+.modebar{
+  display:flex;
+  gap:6px;
+  padding:8px 10px;
+  background:linear-gradient(#d7d7d7,#bababa);
+  border-bottom:2px solid #777;
+}
+.mode-btn{
+  font-family:inherit;
+  font-weight:700;
+  color:#111;
+  background:linear-gradient(#f4f4f4,#bebebe);
+  border:1px solid #777;
+  border-bottom:3px solid #555;
+  padding:10px 12px;
+  cursor:pointer;
+}
+.mode-btn.active{
+  color:#fff;
+  background:var(--red);
+  border-color:var(--red-dark);
+}
+.tool-panel{display:none}
+.tool-panel.active{display:block}
+.calc-panel{
+  padding:12px 14px;
+  border-bottom:2px solid #777;
+  background:linear-gradient(#f2f2f2,#d0d0d0);
+}
+.calc-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-end;
+  margin-bottom:10px;
+  color:#111;
+}
+.calc-head strong{
+  color:var(--blue);
+  font-size:20px;
+}
+.calc-head span{color:#555;font-size:13px}
+.calc-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:10px;
+}
+.calc-grid label{
+  display:grid;
+  gap:5px;
+  color:#111;
+  font-weight:700;
+  text-transform:uppercase;
+  font-size:13px;
+}
+.calc-grid input{
+  width:100%;
+  border:2px solid #777;
+  border-left:34px solid var(--blue);
+  background:#fff;
+  color:var(--blue);
+  outline:none;
+  padding:12px 12px;
+  font-size:24px;
+  font-family:inherit;
+  font-weight:700;
+  border-radius:0;
+}
+.calc-grid input:focus{border-color:#333;border-left-color:var(--red)}
+:root{--red2:var(--red)}
+@media(max-width:760px){
+  .modebar{flex-direction:column}
+  .calc-head{display:grid;align-items:start}
+  .calc-grid input{font-size:20px;border-left-width:28px}
+}
