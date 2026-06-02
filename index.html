@@ -2,79 +2,320 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>Draad tabel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draad & Passing Helper</title>
+
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 20px;
+      background: #0f172a;
+      color: #e5e7eb;
     }
-    input, button {
-      font-size: 18px;
-      padding: 10px;
-      margin-top: 10px;
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      background:
+        linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.95)),
+        url("https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&w=1600&q=80");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .card {
       width: 100%;
+      max-width: 850px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid #334155;
+      border-radius: 22px;
+      padding: 35px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.45);
     }
-    .resultaat {
-      margin-top: 25px;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background: #f7f7f7;
+
+    h1 {
+      margin: 0;
+      font-size: 38px;
+      color: #38bdf8;
+    }
+
+    .subtitle {
+      color: #cbd5e1;
+      margin-top: 10px;
+      margin-bottom: 25px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    input {
+      flex: 1;
+      padding: 16px;
+      font-size: 22px;
+      border-radius: 14px;
+      border: 1px solid #475569;
+      background: #020617;
+      color: white;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #38bdf8;
+    }
+
+    button {
+      padding: 16px 24px;
       font-size: 18px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      background: #38bdf8;
+      color: #020617;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #0ea5e9;
+    }
+
+    .examples {
+      margin-top: 15px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 24px;
+      border-radius: 18px;
+      background: #020617;
+      border: 1px solid #334155;
+      display: none;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #164e63;
+      color: #67e8f9;
+      font-size: 13px;
+      margin-bottom: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 13px;
+      border-bottom: 1px solid #334155;
+      text-align: left;
+    }
+
+    th {
+      color: #38bdf8;
+      width: 40%;
+    }
+
+    .error {
+      color: #fca5a5;
+    }
+
+    .note {
+      margin-top: 18px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    @media (max-width: 650px) {
+      .search-row {
+        flex-direction: column;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
     }
   </style>
 </head>
+
 <body>
+  <div class="hero">
+    <div class="card">
+      <h1>Draad & Passing Helper</h1>
+      <p class="subtitle">Vul draad of passing in. Bijvoorbeeld M10, M10x1.25, 10H7 of 25h6.</p>
 
-  <h1>Draadgegevens zoeken</h1>
+      <div class="search-row">
+        <input id="zoekveld" type="text" placeholder="Typ bijvoorbeeld M10 of 10H7" onkeydown="if(event.key==='Enter') zoeken()">
+        <button onclick="zoeken()">Zoeken</button>
+      </div>
 
-  <p>Vul draadtype in, bijvoorbeeld: <b>M6</b>, <b>M8</b>, <b>M10</b></p>
+      <div class="examples">
+        Voorbeelden: M6, M8, M10, M12x1.5, 10H7, 20H7, 25h6, 40g6
+      </div>
 
-  <input type="text" id="draadInput" placeholder="Bijvoorbeeld M10">
-  <button onclick="zoekDraad()">Zoeken</button>
-
-  <div id="resultaat" class="resultaat" style="display:none;"></div>
+      <div id="resultaat" class="result"></div>
+    </div>
+  </div>
 
   <script>
     const draadTabel = {
-      "M3":  { spoed: "0.5 mm", boor: "2.5 mm" },
-      "M4":  { spoed: "0.7 mm", boor: "3.3 mm" },
-      "M5":  { spoed: "0.8 mm", boor: "4.2 mm" },
-      "M6":  { spoed: "1.0 mm", boor: "5.0 mm" },
-      "M8":  { spoed: "1.25 mm", boor: "6.8 mm" },
-      "M10": { spoed: "1.5 mm", boor: "8.5 mm" },
-      "M12": { spoed: "1.75 mm", boor: "10.2 mm" },
-      "M14": { spoed: "2.0 mm", boor: "12.0 mm" },
-      "M16": { spoed: "2.0 mm", boor: "14.0 mm" },
-      "M18": { spoed: "2.5 mm", boor: "15.5 mm" },
-      "M20": { spoed: "2.5 mm", boor: "17.5 mm" },
-      "M24": { spoed: "3.0 mm", boor: "21.0 mm" },
-      "M30": { spoed: "3.5 mm", boor: "26.5 mm" }
+      "M1": { spoed: 0.25, boor: 0.75 },
+      "M1.2": { spoed: 0.25, boor: 0.95 },
+      "M1.6": { spoed: 0.35, boor: 1.25 },
+      "M2": { spoed: 0.4, boor: 1.6 },
+      "M2.5": { spoed: 0.45, boor: 2.05 },
+      "M3": { spoed: 0.5, boor: 2.5 },
+      "M4": { spoed: 0.7, boor: 3.3 },
+      "M5": { spoed: 0.8, boor: 4.2 },
+      "M6": { spoed: 1.0, boor: 5.0 },
+      "M8": { spoed: 1.25, boor: 6.8 },
+      "M10": { spoed: 1.5, boor: 8.5 },
+      "M12": { spoed: 1.75, boor: 10.2 },
+      "M14": { spoed: 2.0, boor: 12.0 },
+      "M16": { spoed: 2.0, boor: 14.0 },
+      "M18": { spoed: 2.5, boor: 15.5 },
+      "M20": { spoed: 2.5, boor: 17.5 },
+      "M22": { spoed: 2.5, boor: 19.5 },
+      "M24": { spoed: 3.0, boor: 21.0 },
+      "M27": { spoed: 3.0, boor: 24.0 },
+      "M30": { spoed: 3.5, boor: 26.5 },
+      "M36": { spoed: 4.0, boor: 32.0 },
+      "M42": { spoed: 4.5, boor: 37.5 },
+      "M48": { spoed: 5.0, boor: 43.0 },
+      "M56": { spoed: 5.5, boor: 50.5 },
+      "M64": { spoed: 6.0, boor: 58.0 },
+
+      "M8X1": { spoed: 1.0, boor: 7.0 },
+      "M10X1": { spoed: 1.0, boor: 9.0 },
+      "M10X1.25": { spoed: 1.25, boor: 8.8 },
+      "M12X1": { spoed: 1.0, boor: 11.0 },
+      "M12X1.5": { spoed: 1.5, boor: 10.5 },
+      "M16X1.5": { spoed: 1.5, boor: 14.5 },
+      "M20X1.5": { spoed: 1.5, boor: 18.5 },
+      "M24X2": { spoed: 2.0, boor: 22.0 },
+      "M30X2": { spoed: 2.0, boor: 28.0 }
     };
 
-    function zoekDraad() {
-      const invoer = document.getElementById("draadInput").value.toUpperCase().replace(/\s/g, "");
+    function zoeken() {
+      const invoerOrigineel = document.getElementById("zoekveld").value.trim();
+      const invoer = invoerOrigineel.toUpperCase().replace(/\s/g, "");
       const resultaat = document.getElementById("resultaat");
 
-      if (draadTabel[invoer]) {
-        resultaat.style.display = "block";
-        resultaat.innerHTML = `
-          <h2>${invoer}</h2>
-          <p><b>Spoed:</b> ${draadTabel[invoer].spoed}</p>
-          <p><b>Tapboor diameter:</b> ${draadTabel[invoer].boor}</p>
-        `;
-      } else {
-        resultaat.style.display = "block";
-        resultaat.innerHTML = `
-          <p>Geen gegevens gevonden voor <b>${invoer}</b>.</p>
-          <p>Controleer de invoer, bijvoorbeeld M6, M8 of M10.</p>
-        `;
+      resultaat.style.display = "block";
+
+      if (!invoer) {
+        resultaat.innerHTML = `<p class="error">Vul iets in, bijvoorbeeld M10 of 10H7.</p>`;
+        return;
       }
+
+      if (draadTabel[invoer]) {
+        const d = draadTabel[invoer];
+        resultaat.innerHTML = `
+          <span class="tag">Metrische draad</span>
+          <h2>${invoer}</h2>
+          <table>
+            <tr><th>Spoed</th><td>${d.spoed} mm</td></tr>
+            <tr><th>Tapboor diameter</th><td>${d.boor} mm</td></tr>
+          </table>
+          <p class="note">Vuistregel tapboor: nominale diameter min spoed. Controleer altijd bij kritische passing of speciale draad.</p>
+        `;
+        return;
+      }
+
+      const passingMatch = invoerOrigineel.replace(/\s/g, "").match(/^(\d+(\.\d+)?)([A-Za-z]+)(\d+)$/);
+
+      if (passingMatch) {
+        const diameter = parseFloat(passingMatch[1]);
+        const letter = passingMatch[3];
+        const klasse = parseInt(passingMatch[4]);
+        const isGat = letter === letter.toUpperCase();
+
+        const it = berekenIT(diameter, klasse);
+        if (!it) {
+          resultaat.innerHTML = `<p class="error">Deze IT-klasse wordt nog niet ondersteund.</p>`;
+          return;
+        }
+
+        let boven = 0;
+        let onder = 0;
+        let soort = "";
+
+        if (isGat && letter.toUpperCase() === "H") {
+          onder = 0;
+          boven = it;
+          soort = "Gatpassing";
+        } else if (!isGat && letter === "h") {
+          boven = 0;
+          onder = -it;
+          soort = "Aspassing";
+        } else if (!isGat && letter === "g") {
+          boven = -Math.round(2.5 * Math.pow(diameter, 0.34));
+          onder = boven - it;
+          soort = "Aspassing";
+        } else if (!isGat && letter === "f") {
+          boven = -Math.round(5.5 * Math.pow(diameter, 0.41));
+          onder = boven - it;
+          soort = "Aspassing";
+        } else {
+          resultaat.innerHTML = `
+            <p class="error">Deze passing staat nog niet in de calculator.</p>
+            <p>Ondersteund nu: H7, H8, H9, h6, h7, g6, f7 enz.</p>
+          `;
+          return;
+        }
+
+        const minMaat = diameter + onder / 1000;
+        const maxMaat = diameter + boven / 1000;
+
+        resultaat.innerHTML = `
+          <span class="tag">${soort}</span>
+          <h2>${diameter}${letter}${klasse}</h2>
+          <table>
+            <tr><th>Nominale maat</th><td>${diameter.toFixed(3)} mm</td></tr>
+            <tr><th>Ondergrens afwijking</th><td>${onder} µm</td></tr>
+            <tr><th>Bovengrens afwijking</th><td>${boven} µm</td></tr>
+            <tr><th>Minimum maat</th><td>${minMaat.toFixed(3)} mm</td></tr>
+            <tr><th>Maximum maat</th><td>${maxMaat.toFixed(3)} mm</td></tr>
+          </table>
+          <p class="note">Gebaseerd op standaard ISO-passingberekening. Voor werkplaatstekeningen en kritische toleranties altijd controleren met officiële tabel.</p>
+        `;
+        return;
+      }
+
+      resultaat.innerHTML = `
+        <p class="error">Geen resultaat gevonden voor <b>${invoerOrigineel}</b>.</p>
+        <p>Probeer bijvoorbeeld M10, M10x1.25, 10H7 of 25h6.</p>
+      `;
+    }
+
+    function berekenIT(diameter, klasse) {
+      const D = diameter;
+      const i = 0.45 * Math.cbrt(D) + 0.001 * D;
+
+      const factoren = {
+        5: 7,
+        6: 10,
+        7: 16,
+        8: 25,
+        9: 40,
+        10: 64,
+        11: 100,
+        12: 160
+      };
+
+      if (!factoren[klasse]) return null;
+
+      return Math.round(i * factoren[klasse]);
     }
   </script>
-
 </body>
 </html>
-
